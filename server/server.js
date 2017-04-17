@@ -1,11 +1,14 @@
 var express = require('express');
 var bodyParser = require('body-parser');
 
+const {ObjectID} = require('mongodb');
 var {mongoose} = require('./db/mongoose');
 var {Todo} = require('./models/todo');
 var {User} = require('./models/user');
 
 var app = express();
+
+const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
@@ -33,10 +36,46 @@ app.get('/todos', (req, res) => {
     });
 })
 
+// GET todos/i153h373234921 (id)
+
+app.get('/todos/:todosId', (req, res) => {
+    var todosId = req.params.todosId
+
+    if (!ObjectID.isValid(todosId)) {
+    return res.status(404).send();
+    }
+
+Todo.findById(todosId).then((todo) => {
+    res.send({todo})
+    console.log('todo', todo);
+    }).catch((e) => {
+        res.status(404).send()});
+});
 
 
-app.listen(3000, ()=>{
-    console.log('server started on port 3000')
+app.get('/users', (req, res) => {
+    User.find().then((users) => {
+        res.send({users})
+    }).catch((e) => {
+        res.status(404).send()});
+})
+
+app.get('/user/:userId', (req, res) => {
+    var userId = req.params.userId;
+
+    if (!ObjectID.isValid(userId)) {
+    return res.status(404).send();
+    }
+    
+    User.findById(userId).then((user) => {
+        res.send({user})
+    }).catch((e) => {
+        res.status(404).send()});
+
+})
+
+app.listen(port, ()=>{
+    console.log(`server started on port ${port}`)
 });
 
 module.exports = {app};
