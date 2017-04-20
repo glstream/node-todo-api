@@ -13,7 +13,7 @@ const port = process.env.PORT || 3000;
 
 app.use(bodyParser.json());
 
-app.post('/Todos', (req, res) => {
+app.post('/todos', (req, res) => {
     var todo = new Todo({
         text: req.body.text
     });
@@ -22,10 +22,22 @@ app.post('/Todos', (req, res) => {
         res.send(doc)
             .status(200);
     }, (err) => {
-        res.send(err)
+        res.send('Error handle gray test',err)
             .status(400);
     });
 
+});
+
+app.post('/users', (req, res) => {
+    var body = _.pick(req.body, ['email', 'password','name'])
+    var user = new User(body);
+
+    user.save().then(()=>{
+        return user.generateAuthToken();
+    }).then((token) => {
+        res.header('x-auth', token).send(user)
+    }).catch((e) => {
+        res.status(404).send()});;
 });
 
 app.get('/todos', (req, res) => {
